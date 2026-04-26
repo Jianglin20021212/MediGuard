@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI健康预测 | 老人健康监护系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <script src="static/js/ai-dashboard.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; }
+        body { 
+            background: #0a1628;
+            background-image: url('https://images.unsplash.com/photo-1488229297570-58520851e868?w=1920&q=80');
+            background-size: cover; background-position: center; background-attachment: fixed;
+            position: relative; color: white; min-height: 100vh;
+        }
+        body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10,22,40,0.7); z-index: -1; }
+        
+        .navbar { background: #2c5282; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; z-index: 10; }
+        .logo { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .logo i { font-size: 28px; }
+        .logo span { font-size: 22px; font-weight: bold; }
+        .nav-menu { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+        .dropdown { position: relative; display: inline-block; }
+        .dropbtn { background: none; border: none; color: white; font-size: 16px; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: all 0.3s; }
+        .dropbtn:hover { background: #1e3a8a; }
+        .dropdown-content { display: none; position: absolute; background: white; min-width: 160px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); border-radius: 8px; z-index: 10; }
+        .dropdown-content a { color: #2c5282 !important; padding: 10px 15px; display: block; text-decoration: none; font-size: 14px; transition: all 0.2s; }
+        .dropdown-content a:hover { background: #f0f2f5; padding-left: 20px; }
+        .dropdown:hover .dropdown-content { display: block; }
+        .nav-menu a { color: white; text-decoration: none; padding: 8px 12px; border-radius: 6px; transition: all 0.3s; }
+        .nav-menu a:hover, .nav-menu a.active { background: #1e3a8a; }
+        .nav-menu button { background: none; border: none; color: white; font-size: 16px; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: all 0.3s; }
+        .nav-menu button:hover { background: #1e3a8a; }
+        
+        .user-info { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.15); padding: 6px 16px; border-radius: 40px; }
+        .user-avatar { width: 32px; height: 32px; background: #ffd700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #2c5282; font-weight: bold; font-size: 16px; }
+        .user-details { display: flex; flex-direction: column; line-height: 1.3; }
+        .user-name { font-weight: bold; font-size: 14px; }
+        .user-role { font-size: 11px; opacity: 0.85; }
+        
+        .container { max-width: 1500px; margin: 0 auto; padding: 20px; }
+        
+        .page-header { text-align: center; padding: 20px 0; margin-bottom: 15px; }
+        .page-header h1 { font-size: 32px; background: linear-gradient(90deg, #ffd700, #ffed4e); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .control-panel {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px; padding: 18px; margin-bottom: 20px;
+            display: flex; gap: 12px; align-items: center; flex-wrap: wrap; backdrop-filter: blur(10px);
+        }
+        .control-panel select {
+            padding: 10px 18px; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2); color: white;
+            border-radius: 8px; font-size: 14px; min-width: 220px;
+        }
+        .control-panel select option { background: #1a2a3a; color: white; }
+        
+        .btn { padding: 10px 22px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #2c5282, #1e3a8a); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #ed8936, #dd6b20); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+        .stat-card {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px; padding: 22px; text-align: center;
+            backdrop-filter: blur(10px); transition: all 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+        .stat-card .stat-value { font-size: 44px; font-weight: bold; }
+        .stat-card .stat-label { font-size: 13px; opacity: 0.7; margin-top: 6px; }
+        
+        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; }
+        .chart-card {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px; padding: 20px; backdrop-filter: blur(10px);
+        }
+        .chart-card h3 { color: #ffd700; margin-bottom: 12px; font-size: 16px; }
+        .chart-container { width: 100%; height: 350px; }
+        
+        .anomaly-panel {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px; padding: 20px; margin-bottom: 20px;
+        }
+        .anomaly-panel h3 { color: #ffd700; margin-bottom: 12px; }
+        .anomaly-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+        .anomaly-item {
+            background: rgba(229,62,62,0.15); border: 1px solid rgba(229,62,62,0.3);
+            border-radius: 10px; padding: 14px; text-align: center;
+        }
+        .anomaly-item .anomaly-value { font-size: 26px; font-weight: bold; color: #e53e3e; }
+        
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 8px; color: white; display: none; z-index: 9999; font-size: 14px; }
+        .toast.show { display: block; }
+        .toast.success { background: #52c41a; }
+        .toast.error { background: #e53e3e; }
+        .toast.warning { background: #faad14; }
+        
+        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .charts-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } .navbar { flex-direction: column; gap: 15px; } .control-panel { flex-direction: column; } }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="logo" onclick="location.href='index.html'">
+        <i>❤️</i>
+        <span>老人健康监护系统</span>
+    </div>
+    <div class="nav-menu" id="navMenu"></div>
+    <div class="user-info" id="userInfo">
+        <div class="user-avatar" id="userAvatar">👤</div>
+        <div class="user-details">
+            <span class="user-name" id="userName">加载中...</span>
+            <span class="user-role" id="userRole">--</span>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="page-header"><h1>🤖 AI健康预测大屏</h1></div>
+    
+    <div class="control-panel">
+        <select id="elderSelect"><option value="">-- 请选择老人 --</option></select>
+        <button class="btn btn-warning" onclick="generateSimData()">🎲 生成模拟数据</button>
+        <button class="btn btn-primary" onclick="loadPrediction()">🔍 智能分析</button>
+        <span style="color:#999; font-size:12px;">💡 首次使用请先"生成模拟数据"，再点"智能分析"</span>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="riskScore" style="color:#ffd700;">--</div><div class="stat-label">🤖 AI风险评分</div></div>
+        <div class="stat-card"><div class="stat-value" id="riskLevel">--</div><div class="stat-label">⚠️ 风险等级</div></div>
+        <div class="stat-card"><div class="stat-value" id="dataDays" style="color:#66b3ff;">--</div><div class="stat-label">📊 数据天数</div></div>
+        <div class="stat-card"><div class="stat-value" id="anomalyCount" style="color:#ed8936;">--</div><div class="stat-label">🔔 检测异常</div></div>
+    </div>
+    
+    <div class="charts-grid">
+        <div class="chart-card"><h3>🎯 健康风险雷达图</h3><div id="radarChart" class="chart-container"></div></div>
+        <div class="chart-card"><h3>📈 血压趋势预测</h3><div id="bpTrendChart" class="chart-container"></div></div>
+        <div class="chart-card"><h3>🩸 血糖趋势预测</h3><div id="sugarTrendChart" class="chart-container"></div></div>
+        <div class="chart-card"><h3>💓 心率趋势预测</h3><div id="heartTrendChart" class="chart-container"></div></div>
+    </div>
+    
+    <div class="anomaly-panel">
+        <h3>🔍 异常检测结果</h3>
+        <div id="anomalyResults" class="anomaly-list"><p style="opacity:0.5; text-align:center; padding:30px; grid-column:1/-1;">请选择老人并点击"智能分析"</p></div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    const API ='http://localhost:8080/api';
+    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    if (!user.username) { window.location.href = 'login.html'; }
+    const role = user.role || 'admin';
+
+    const roleNames = { 'admin': '👑 系统管理员', 'worker': '👨‍⚕️ 护工', 'family': '👨‍👩‍👧 家属' };
+    const roleIcons = { 'admin': '👑', 'worker': '🩺', 'family': '💝' };
+
+    let aiDashboard = new AIDashboard();
+    let allHealthData = [];
+
+    function displayUserInfo() {
+        document.getElementById('userName').innerText = user.username || '未知用户';
+        document.getElementById('userRole').innerHTML = roleNames[role] || role;
+        document.getElementById('userAvatar').innerHTML = roleIcons[role] || '👤';
+    }
+    function logout() { localStorage.removeItem('currentUser'); location.href = 'login.html'; }
+    function showToast(msg, type) { const t = document.getElementById('toast'); t.innerText = msg; t.className = `toast ${type} show`; setTimeout(() => t.className = 'toast', 3000); }
+
+    const navMenu = document.getElementById('navMenu');
+    const commonDropdowns = `
+        <div class="dropdown"><button class="dropbtn">数据看板 ▼</button><div class="dropdown-content"><a href="dashboard.html">数据大屏</a><a href="ai_dashboard.html">AI预测</a><a href="warning.html">健康预警</a><a href="result.html">风险评估</a></div></div>
+        <div class="dropdown"><button class="dropbtn">亲情留言 ▼</button><div class="dropdown-content"><a href="messages.html">查看留言</a><a href="messages.html">发送留言</a></div></div>
+        <div class="dropdown"><button class="dropbtn">健康知识库 ▼</button><div class="dropdown-content"><a href="knowledge.html">健康知识库</a></div></div>
+        <div class="dropdown"><button class="dropbtn">系统设置 ▼</button><div class="dropdown-content"><a href="setting.html">账号设置</a></div></div>
+        <button onclick="logout()">退出登录</button>
+    `;
+    if (role === 'admin') {
+        navMenu.innerHTML = `<a href="index.html">🏠 首页</a>
+            <div class="dropdown"><button class="dropbtn">老人管理 ▼</button><div class="dropdown-content"><a href="list.html">老人列表</a><a href="add.html">健康录入</a></div></div>
+            <div class="dropdown"><button class="dropbtn">服务管理 ▼</button><div class="dropdown-content"><a href="service.html">服务记录</a><a href="orders.html">订单管理</a></div></div>
+            ${commonDropdowns}`;
+    } else if (role === 'worker') {
+        navMenu.innerHTML = `<a href="index.html">🏠 首页</a>
+            <div class="dropdown"><button class="dropbtn">老人管理 ▼</button><div class="dropdown-content"><a href="list.html">老人信息</a><a href="add.html">健康录入</a></div></div>
+            <div class="dropdown"><button class="dropbtn">订单管理 ▼</button><div class="dropdown-content"><a href="orders.html">待接单</a><a href="service.html">服务记录</a></div></div>
+            ${commonDropdowns}`;
+    } else {
+        navMenu.innerHTML = `<a href="index.html">🏠 首页</a>
+            <div class="dropdown"><button class="dropbtn">老人服务 ▼</button><div class="dropdown-content"><a href="family_bind.html">绑定老人</a><a href="accompany.html">一键陪诊</a><a href="orders.html">我的订单</a><a href="messages.html">亲情留言</a></div></div>
+            ${commonDropdowns}`;
+    }
+
+    async function loadElders() {
+    try {
+        const res = await fetch(`${API}/elders`);
+        const result = await res.json();
+        if (result.code === 200) {
+            let elders = result.data || [];
+            const select = document.getElementById('elderSelect');
+            
+            // 家属只看绑定老人
+            if (role === 'family') {
+                let bindings = JSON.parse(localStorage.getItem(`bind_${user.username}`) || '[]');
+                elders = elders.filter(e => bindings.some(b => b.elderId === e.id));
+                select.innerHTML = '<option value="">-- 请选择绑定老人 --</option>';
+            } else {
+                select.innerHTML = '<option value="">-- 请选择老人 --</option>';
+            }
+            
+            elders.forEach(elder => { select.innerHTML += `<option value="${elder.id}">${elder.name} (${elder.id})</option>`; });
+        }
+    } catch(e) { showToast('加载老人列表失败', 'error'); }
+}
+    async function generateSimData() {
+        const elderId = document.getElementById('elderSelect').value;
+        if (!elderId) { showToast('请先选择老人', 'warning'); return; }
+        showToast('正在生成模拟数据...', 'warning');
+        try {
+            const res = await fetch(`${API}/simulate/data/${elderId}`, { method: 'POST' });
+            const result = await res.json();
+            if (result.code === 200) { showToast(result.msg, 'success'); }
+            else { showToast(result.msg || '生成失败', 'error'); }
+        } catch(e) { showToast('生成失败，请确认后端已启动', 'error'); }
+    }
+
+    async function loadPrediction() {
+        const elderId = document.getElementById('elderSelect').value;
+        if (!elderId) { showToast('请先选择老人', 'warning'); return; }
+        document.getElementById('riskScore').textContent = '...';
+        document.getElementById('riskLevel').textContent = '分析中';
+        try {
+            const healthRes = await fetch(`${API}/healthData?elder_id=${elderId}`);
+            const healthResult = await healthRes.json();
+            allHealthData = (healthResult.data || []).sort((a, b) => new Date(a.measureDate) - new Date(b.measureDate));
+            const predRes = await fetch(`${API}/ai/comprehensive/${elderId}`);
+            const predResult = await predRes.json();
+            if (predResult.code !== 200 || !predResult.data || !predResult.data.prediction || !predResult.data.prediction.predictions || Object.keys(predResult.data.prediction.predictions).length === 0) {
+                showToast('数据不足，请先生成模拟数据', 'warning'); return;
+            }
+            updateDashboard(elderId, predResult.data, allHealthData);
+            showToast('分析完成', 'success');
+        } catch(e) { showToast('加载失败', 'error'); }
+    }
+
+    function updateDashboard(elderId, predictionData, healthData) {
+        const prediction = predictionData.prediction;
+        const anomaly = predictionData.anomaly_detection;
+        if (prediction && prediction.overall_risk) {
+            const risk = prediction.overall_risk;
+            document.getElementById('riskScore').textContent = risk.score;
+            const colors = { 'critical': '#e53e3e', 'high': '#ed8936', 'moderate': '#ecc94b', 'low': '#52c41a' };
+            document.getElementById('riskScore').style.color = colors[risk.level] || '#ffd700';
+            document.getElementById('riskLevel').textContent = { 'critical': '🔴 危急', 'high': '🟠 高风险', 'moderate': '🟡 中等', 'low': '🟢 低风险' }[risk.level] || risk.level;
+            document.getElementById('riskLevel').style.color = colors[risk.level] || '#ffd700';
+        }
+        document.getElementById('dataDays').textContent = healthData.length;
+        document.getElementById('anomalyCount').textContent = anomaly && anomaly.anomalies ? Object.keys(anomaly.anomalies).length : '0';
+        if (prediction && prediction.predictions) {
+            aiDashboard.createRiskRadarChart('radarChart', prediction);
+            if (healthData.length > 0) {
+                aiDashboard.createTrendChart('bpTrendChart', healthData, prediction, 'sys_bp');
+                aiDashboard.createTrendChart('sugarTrendChart', healthData, prediction, 'blood_sugar');
+                aiDashboard.createTrendChart('heartTrendChart', healthData, prediction, 'heart_rate');
+            }
+        }
+        updateAnomalyDisplay(anomaly);
+    }
+
+    function updateAnomalyDisplay(anomalyData) {
+        const container = document.getElementById('anomalyResults');
+        if (!anomalyData || !anomalyData.anomalies || Object.keys(anomalyData.anomalies).length === 0) {
+            container.innerHTML = '<p style="color:#52c41a; text-align:center; padding:30px; grid-column:1/-1;">✅ 未检测到异常指标</p>'; return;
+        }
+        const names = { 'sys_bp': '收缩压', 'dia_bp': '舒张压', 'blood_sugar': '血糖', 'heart_rate': '心率', 'spo2': '血氧' };
+        let html = '';
+        for (const [ind, details] of Object.entries(anomalyData.anomalies)) {
+            html += `<div class="anomaly-item"><div style="font-size:12px; opacity:0.7;">⚠️ ${names[ind] || ind}</div><div class="anomaly-value">${details.latest_value}</div><div style="font-size:11px; opacity:0.6;">偏离 ${Math.abs(details.z_score).toFixed(1)}σ</div></div>`;
+        }
+        container.innerHTML = html;
+    }
+
+    displayUserInfo();
+    loadElders();
+</script>
+</body>
+</html>

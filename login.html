@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>登录 | 老人健康监护系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2c5282">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; }
+        body { 
+            background: #0f1b2d;
+            background-image: url('https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15,27,45,0.78);
+            z-index: 0;
+        }
+        
+        .bg-orb {
+            position: fixed;
+            border-radius: 50%;
+            opacity: 0.06;
+            pointer-events: none;
+            z-index: 0;
+            animation: orbFloat 12s ease-in-out infinite;
+        }
+        .bg-orb:nth-child(1) { width: 350px; height: 350px; top: -100px; left: -80px; background: #4299e1; animation-delay: 0s; }
+        .bg-orb:nth-child(2) { width: 250px; height: 250px; bottom: -80px; right: -60px; background: #48bb78; animation-delay: 3s; }
+        .bg-orb:nth-child(3) { width: 180px; height: 180px; top: 55%; left: 55%; background: #ed8936; animation-delay: 6s; }
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(25px, -25px) scale(1.1); }
+            66% { transform: translate(-15px, 15px) scale(0.9); }
+        }
+        
+        .login-box { 
+            width: 430px; 
+            background: rgba(255,255,255,0.96); 
+            padding: 45px 40px; 
+            border-radius: 24px; 
+            text-align: center; 
+            box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 10px 30px rgba(102,126,234,0.4);
+            transition: all 0.3s;
+        }
+        .login-logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 14px 38px rgba(102,126,234,0.5);
+        }
+        
+        h2 { 
+            color: #2c5282; 
+            margin-bottom: 6px; 
+            font-size: 26px;
+            font-weight: 700;
+        }
+        .welcome-text { 
+            color: #718096; 
+            font-size: 14px; 
+            margin-bottom: 28px; 
+        }
+        
+        .input-group {
+            position: relative;
+            margin: 14px 0;
+        }
+        .input-group i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+            font-size: 16px;
+            z-index: 1;
+            transition: all 0.3s;
+        }
+        input, select { 
+            width: 100%; 
+            padding: 14px 14px 14px 45px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
+            font-size: 15px; 
+            transition: all 0.3s;
+            background: #f7fafc;
+            outline: none;
+        }
+        input:focus, select:focus { 
+            border-color: #667eea; 
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+            background: white;
+        }
+        select { 
+            padding-left: 14px; 
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23718096' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+        
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background: linear-gradient(135deg, #667eea, #764ba2); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold;
+            margin-top: 18px; 
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+            letter-spacing: 2px;
+        }
+        button:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(102,126,234,0.45);
+        }
+        .register-btn { 
+            background: white; 
+            color: #667eea; 
+            border: 2px solid #e2e8f0;
+            box-shadow: none;
+            letter-spacing: 0;
+        }
+        .register-btn:hover { 
+            background: #f7fafc;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .msg { 
+            margin-top: 14px; 
+            font-size: 14px; 
+            min-height: 24px; 
+            transition: all 0.3s;
+        }
+        .msg.error { color: #e53e3e; }
+        .msg.success { color: #38a169; }
+        
+        .register-box { display: none; }
+        .divider { 
+            margin: 22px 0; 
+            color: #a0aec0; 
+            font-size: 13px;
+            position: relative; 
+        }
+        .divider::before, .divider::after { 
+            content: ""; 
+            position: absolute; 
+            top: 50%; 
+            width: 35%; 
+            height: 1px; 
+            background: #e2e8f0; 
+        }
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+        
+        .footer-note { 
+            margin-top: 25px; 
+            font-size: 12px; 
+            color: #a0aec0; 
+        }
+        
+        .offline-indicator {
+            display: none;
+            background: #fff5f5;
+            color: #e53e3e;
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            border: 1px solid #fed7d7;
+        }
+        .offline-indicator.show { display: block; }
+        
+        @media (max-width: 480px) {
+            .login-box { width: 92%; margin: 20px; padding: 30px 22px; }
+            .login-box h2 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+
+    <div class="login-box">
+        <div class="login-logo">❤️</div>
+        <h2>老人健康监护系统</h2>
+        <p class="welcome-text">智能守护 · 让爱陪伴</p>
+        
+        <div id="offlineIndicator" class="offline-indicator">
+            ⚠️ 当前处于离线模式，部分功能可能不可用
+        </div>
+        
+        <div id="loginBox">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="username" placeholder="用户名" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="密码">
+            </div>
+            <select id="role">
+                <option value="admin">👑 管理员</option>
+                <option value="worker">👨‍⚕️ 护工</option>
+                <option value="family">👨‍👩‍👧 家属</option>
+            </select>
+            <button onclick="doLogin()">🔐 登 录</button>
+            <div class="divider">或者</div>
+            <button class="register-btn" onclick="showRegister()">📝 还没有账号？点击注册</button>
+            <div id="loginMsg" class="msg"></div>
+        </div>
+        
+        <div id="registerBox" class="register-box">
+            <div class="input-group">
+                <i class="fas fa-user-plus"></i>
+                <input type="text" id="regUsername" placeholder="用户名" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="regPassword" placeholder="密码（至少6位）">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-check-circle"></i>
+                <input type="password" id="regConfirmPwd" placeholder="确认密码">
+            </div>
+            <select id="regRole">
+                <option value="admin">👑 管理员</option>
+                <option value="worker">👨‍⚕️ 护工</option>
+                <option value="family">👨‍👩‍👧 家属</option>
+            </select>
+            <button onclick="doRegister()">✅ 注 册</button>
+            <div class="divider">或者</div>
+            <button class="register-btn" onclick="showLogin()">⬅️ 返回登录</button>
+            <div id="regMsg" class="msg"></div>
+        </div>
+        
+        <div class="footer-note">用心守护每一位老人 ❤️</div>
+    </div>
+
+    <script>
+        const API ='http://localhost:8080/api';
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+            });
+        }
+
+        window.addEventListener('online', () => { document.getElementById('offlineIndicator').classList.remove('show'); });
+        window.addEventListener('offline', () => { document.getElementById('offlineIndicator').classList.add('show'); });
+        if (!navigator.onLine) { document.getElementById('offlineIndicator').classList.add('show'); }
+
+        function showLoginMsg(msg, isError) {
+            const t = document.getElementById('loginMsg');
+            t.innerText = msg;
+            t.className = 'msg ' + (isError ? 'error' : 'success');
+            setTimeout(() => { t.innerText = ''; t.className = 'msg'; }, 3500);
+        }
+        function showRegMsg(msg, isError) {
+            const t = document.getElementById('regMsg');
+            t.innerText = msg;
+            t.className = 'msg ' + (isError ? 'error' : 'success');
+            setTimeout(() => { t.innerText = ''; t.className = 'msg'; }, 3500);
+        }
+        function showRegister() {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('registerBox').style.display = 'block';
+        }
+        function showLogin() {
+            document.getElementById('loginBox').style.display = 'block';
+            document.getElementById('registerBox').style.display = 'none';
+        }
+
+        async function doLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            if (!username) { showLoginMsg('请输入用户名', true); return; }
+            if (!password) { showLoginMsg('请输入密码', true); return; }
+            if (!navigator.onLine) {
+                const savedUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                if (savedUser.username === username) {
+                    showLoginMsg('✅ 离线登录成功！', false);
+                    setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+                } else {
+                    showLoginMsg('❌ 需首次在线登录', true);
+                }
+                return;
+            }
+            try {
+                const res = await fetch(`${API}/loginByRole`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, role })
+                });
+                const data = await res.json();
+                if (data.code === 200) {
+                    localStorage.setItem('currentUser', JSON.stringify({ username, role }));
+                    showLoginMsg('✅ 登录成功！', false);
+                    setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+                } else {
+                    showLoginMsg(data.msg === '该用户还未注册' ? '❌ 该用户还未注册' : '❌ 密码错误', true);
+                }
+            } catch(e) { showLoginMsg('❌ 无法连接服务器', true); }
+        }
+
+        async function doRegister() {
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('regConfirmPwd').value;
+            const role = document.getElementById('regRole').value;
+            if (!username) { showRegMsg('请输入用户名', true); return; }
+            if (password.length < 6) { showRegMsg('密码至少6位', true); return; }
+            if (password !== confirm) { showRegMsg('两次密码不一致', true); return; }
+            try {
+                const res = await fetch(`${API}/register`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, role })
+                });
+                const data = await res.json();
+                if (data.code === 200) {
+                    showRegMsg('✅ 注册成功！', false);
+                    document.getElementById('username').value = username;
+                    document.getElementById('role').value = role;
+                    setTimeout(showLogin, 2000);
+                } else {
+                    showRegMsg('❌ ' + (data.msg || '注册失败'), true);
+                }
+            } catch(e) { showRegMsg('❌ 无法连接服务器', true); }
+        }
+
+        document.getElementById('password').addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
+        document.getElementById('regConfirmPwd').addEventListener('keypress', e => { if (e.key === 'Enter') doRegister(); });
+    </script>
+</body>
+</html>

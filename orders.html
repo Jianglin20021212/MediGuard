@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单管理 | 老人健康监护系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; }
+        body { 
+            background: #f5f7fa;
+            background-image: url('https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1920&q=80');
+            background-size: cover; background-position: center; background-attachment: fixed;
+            position: relative;
+        }
+        body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(245,247,250,0.7); z-index: -1; }
+        
+        .navbar { background: #2c5282; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .logo { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .logo i { font-size: 28px; }
+        .logo span { font-size: 22px; font-weight: bold; }
+        .nav-menu { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+        .dropdown { position: relative; display: inline-block; }
+        .dropbtn { background: none; border: none; color: white; font-size: 16px; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: all 0.3s; }
+        .dropbtn:hover { background: #1e3a8a; }
+        .dropdown-content { display: none; position: absolute; background: white; min-width: 150px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); border-radius: 8px; z-index: 1; }
+        .dropdown-content a { color: #2c5282 !important; padding: 10px 15px; display: block; text-decoration: none; font-size: 14px; transition: all 0.2s; }
+        .dropdown-content a:hover { background: #f0f2f5; padding-left: 20px; }
+        .dropdown:hover .dropdown-content { display: block; }
+        .nav-menu a { color: white; text-decoration: none; padding: 8px 12px; border-radius: 6px; transition: all 0.3s; }
+        .nav-menu a:hover, .nav-menu a.active { background: #1e3a8a; }
+        .nav-menu button { background: none; border: none; color: white; font-size: 16px; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: all 0.3s; }
+        .nav-menu button:hover { background: #1e3a8a; }
+        
+        .user-info { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.15); padding: 6px 16px; border-radius: 40px; }
+        .user-avatar { width: 32px; height: 32px; background: #ffd700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #2c5282; font-weight: bold; font-size: 16px; }
+        .user-details { display: flex; flex-direction: column; line-height: 1.3; }
+        .user-name { font-weight: bold; font-size: 14px; }
+        .user-role { font-size: 11px; opacity: 0.85; }
+        
+        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        h2 { color: #2c5282; margin-bottom: 20px; font-size: 24px; }
+        
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .stat-card .number { font-size: 32px; font-weight: bold; color: #2c5282; }
+        .stat-card .label { color: #666; font-size: 14px; margin-top: 5px; }
+        
+        .filter-bar { background: white; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+        .filter-bar select { padding: 8px 15px; border: 1px solid #ddd; border-radius: 6px; }
+        .filter-bar button { padding: 8px 20px; background: #2c5282; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .filter-bar button:hover { background: #1e3a8a; }
+        .clear-btn { background: #ff4d4f; }
+        .clear-btn:hover { background: #e03a3c; }
+        
+        .table-wrapper { overflow-x: auto; border-radius: 12px; }
+        table { width: 100%; min-width: 1000px; border-collapse: collapse; background: white; }
+        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { background: #2c5282; color: white; font-weight: 600; text-align: center; }
+        td { text-align: center; }
+        tr:hover { background: #f8f9fa; }
+        
+        .status-pending { color: #ed8936; font-weight: bold; }
+        .status-accepted { color: #52c41a; font-weight: bold; }
+        
+        .oper-btn { padding: 6px 12px; background: #2c5282; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 2px; }
+        .oper-btn:hover { background: #1e3a8a; }
+        .assign-btn { background: #1890ff; }
+        .assign-btn:hover { background: #0c7cd5; }
+        
+        .badge-emergency { background: #ff4d4f; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; display: inline-block; }
+        .badge-normal { background: #1890ff; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; display: inline-block; }
+        
+        .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 8px; color: white; display: none; z-index: 9999; }
+        .toast.show { display: block; }
+        .toast.success { background: #52c41a; }
+        .toast.error { background: #ff4d4f; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 380px; max-width: 90%; }
+        .modal-content h3 { margin-bottom: 15px; color: #2c5282; }
+        .modal-content .order-info { background: #f0f2f5; padding: 10px; border-radius: 6px; margin: 15px 0; text-align: center; }
+        .modal-content select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .modal-content button { padding: 10px 20px; margin-right: 10px; border: none; border-radius: 6px; cursor: pointer; }
+        .modal-confirm { background: #2c5282; color: white; }
+        .modal-cancel { background: #ccc; color: #333; }
+        
+        @media (max-width: 768px) { .navbar { flex-direction: column; gap: 15px; } .stats { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="logo" onclick="location.href='index.html'">
+        <i>❤️</i>
+        <span>老人健康监护系统</span>
+    </div>
+    <div class="nav-menu" id="navMenu"></div>
+    <div class="user-info" id="userInfo">
+        <div class="user-avatar" id="userAvatar">👤</div>
+        <div class="user-details">
+            <span class="user-name" id="userName">加载中...</span>
+            <span class="user-role" id="userRole">--</span>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <h2>📦 订单管理</h2>
+    
+    <div class="stats">
+        <div class="stat-card"><div class="number" id="totalCount">0</div><div class="label">总订单数</div></div>
+        <div class="stat-card"><div class="number" id="pendingCount">0</div><div class="label">待接单</div></div>
+        <div class="stat-card"><div class="number" id="acceptedCount">0</div><div class="label">已接单</div></div>
+    </div>
+    
+    <div class="filter-bar">
+        <select id="statusFilter"><option value="">全部状态</option><option value="pending">待接单</option><option value="accepted">已接单</option></select>
+        <button onclick="applyFilter()">筛选</button>
+        <button onclick="loadOrders()">刷新</button>
+        <button class="clear-btn" onclick="clearAllOrders()">清空所有订单</button>
+    </div>
+    
+    <div class="table-wrapper">
+        <table>
+            <thead><tr><th width="15%">订单号</th><th width="10%">老人编号</th><th width="10%">老人姓名</th><th width="10%">家属</th><th width="10%">护工</th><th width="10%">类型</th><th width="8%">状态</th><th width="15%">创建时间</th><th width="12%">操作</th></tr></thead>
+            <tbody id="orderBody"><tr><td colspan="9" style="text-align:center; padding:40px;">加载中...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="assignModal" class="modal">
+    <div class="modal-content">
+        <h3>指派护工</h3>
+        <div class="order-info">订单号：<span id="assignOrderId"></span></div>
+        <select id="workerSelect"><option value="">-- 请选择护工 --</option></select>
+        <div><button class="modal-confirm" onclick="confirmAssign()">确认指派</button><button class="modal-cancel" onclick="closeAssignModal()">取消</button></div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    const API ='http://localhost:8080/api';
+    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    if (!user.username) window.location.href = 'login.html';
+    const role = user.role || 'admin';
+    let allOrders = [], allElders = [], allWorkers = [], currentAssignOrder = null;
+
+    const roleNames = { 'admin': '👑 系统管理员', 'worker': '👨‍⚕️ 护工', 'family': '👨‍👩‍👧 家属' };
+    const roleIcons = { 'admin': '👑', 'worker': '🩺', 'family': '💝' };
+
+    function displayUserInfo() {
+        document.getElementById('userName').innerText = user.username || '未知用户';
+        document.getElementById('userRole').innerHTML = roleNames[role] || role;
+        document.getElementById('userAvatar').innerHTML = roleIcons[role] || '👤';
+    }
+
+    function showToast(msg, type) { const t = document.getElementById('toast'); t.innerText = msg; t.className = 'toast ' + type + ' show'; setTimeout(() => t.className = 'toast', 3000); }
+
+    async function clearAllOrders() {
+        if (!confirm('⚠️ 警告：这将永久删除所有订单数据！\n\n确定要清空吗？')) return;
+        try {
+            const res = await fetch(API + '/orders/all', { method: 'DELETE' });
+            const result = await res.json();
+            if (result.code === 200) { showToast('已清空所有订单', 'success'); loadOrders(); }
+            else showToast(result.msg || '清空失败', 'error');
+        } catch(e) { showToast('清空失败', 'error'); }
+    }
+
+    const navMenu = document.getElementById('navMenu');
+    if (role === 'admin') {
+        navMenu.innerHTML = `<a href="index.html">🏠 首页</a>
+            <div class="dropdown"><button class="dropbtn">老人管理 ▼</button><div class="dropdown-content"><a href="list.html">老人列表</a><a href="add.html">健康录入</a></div></div>
+            <div class="dropdown"><button class="dropbtn">健康管理 ▼</button><div class="dropdown-content"><a href="add.html">健康录入</a><a href="warning.html">健康预警</a><a href="result.html">风险评估</a></div></div>
+            <div class="dropdown"><button class="dropbtn">服务管理 ▼</button><div class="dropdown-content"><a href="service.html">服务记录</a><a href="orders.html" class="active">订单管理</a></div></div>
+            <div class="dropdown"><button class="dropbtn">数据看板 ▼</button><div class="dropdown-content"><a href="dashboard.html">数据大屏</a></div></div>
+            <div class="dropdown"><button class="dropbtn">亲情留言 ▼</button><div class="dropdown-content"><a href="messages.html">查看留言</a><a href="messages.html">发送留言</a></div></div>
+            <div class="dropdown"><button class="dropbtn">健康知识库 ▼</button><div class="dropdown-content"><a href="knowledge.html">健康知识库</a></div></div>
+            <div class="dropdown"><button class="dropbtn">系统设置 ▼</button><div class="dropdown-content"><a href="setting.html">账号设置</a></div></div>
+            <button onclick="localStorage.removeItem('currentUser');location.href='login.html'">退出登录</button>`;
+    } else if (role === 'worker') {
+        navMenu.innerHTML = `<a href="index.html">🏠 首页</a>
+            <div class="dropdown"><button class="dropbtn">老人管理 ▼</button><div class="dropdown-content"><a href="list.html">老人信息</a><a href="add.html">健康录入</a></div></div>
+            <div class="dropdown"><button class="dropbtn">订单管理 ▼</button><div class="dropdown-content"><a href="orders.html" class="active">待接单</a><a href="service.html">服务记录</a></div></div>
+            <div class="dropdown"><button class="dropbtn">数据看板 ▼</button><div class="dropdown-content"><a href="dashboard.html">数据大屏</a><a href="result.html">风险评估</a></div></div>
+            <div class="dropdown"><button class="dropbtn">亲情留言 ▼</button><div class="dropdown-content"><a href="messages.html">查看留言</a><a href="messages.html">发送留言</a></div></div>
+            <div class="dropdown"><button class="dropbtn">健康知识库 ▼</button><div class="dropdown-content"><a href="knowledge.html">健康知识库</a></div></div>
+            <div class="dropdown"><button class="dropbtn">系统设置 ▼</button><div class="dropdown-content"><a href="setting.html">账号设置</a></div></div>
+            <button onclick="localStorage.removeItem('currentUser');location.href='login.html'">退出登录</button>`;
+    } else {
+        navMenu.innerHTML = `<a href="index.html">🏠 首页</a>
+            <div class="dropdown"><button class="dropbtn">老人服务 ▼</button><div class="dropdown-content"><a href="family_bind.html">绑定老人</a><a href="accompany.html">一键陪诊</a><a href="orders.html" class="active">我的订单</a><a href="messages.html">亲情留言</a></div></div>
+            <div class="dropdown"><button class="dropbtn">数据看板 ▼</button><div class="dropdown-content"><a href="dashboard.html">数据大屏</a><a href="warning.html">健康预警</a></div></div>
+            <div class="dropdown"><button class="dropbtn">亲情留言 ▼</button><div class="dropdown-content"><a href="messages.html">查看留言</a><a href="messages.html">发送留言</a></div></div>
+            <div class="dropdown"><button class="dropbtn">健康知识库 ▼</button><div class="dropdown-content"><a href="knowledge.html">健康知识库</a></div></div>
+            <div class="dropdown"><button class="dropbtn">系统设置 ▼</button><div class="dropdown-content"><a href="setting.html">账号设置</a></div></div>
+            <button onclick="localStorage.removeItem('currentUser');location.href='login.html'">退出登录</button>`;
+    }
+
+    async function loadWorkers() {
+        try {
+            const res = await fetch(API + '/users?role=worker');
+            allWorkers = ((await res.json()).data || []).filter(w => w.role === 'worker');
+        } catch(e) { allWorkers = []; }
+    }
+
+    function showAssignModal(order) {
+        currentAssignOrder = order;
+        document.getElementById('assignOrderId').innerText = order.orderId;
+        document.getElementById('workerSelect').innerHTML = '<option value="">-- 请选择护工 --</option>' + allWorkers.map(w => `<option value="${w.username}">${w.username}</option>`).join('');
+        document.getElementById('assignModal').style.display = 'flex';
+    }
+    function closeAssignModal() { document.getElementById('assignModal').style.display = 'none'; currentAssignOrder = null; }
+    
+    async function confirmAssign() {
+        const workerId = document.getElementById('workerSelect').value;
+        if (!workerId) { showToast('请选择护工', 'error'); return; }
+        if (!currentAssignOrder) { showToast('订单信息错误', 'error'); closeAssignModal(); return; }
+        try {
+            const res = await fetch(API + '/orders/accept', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId: currentAssignOrder.orderId, workerId: workerId }) });
+            if ((await res.json()).code === 200) { showToast('指派成功', 'success'); closeAssignModal(); loadOrders(); } 
+            else showToast('指派失败', 'error');
+        } catch(e) { showToast('指派失败', 'error'); }
+    }
+
+    async function loadOrders() {
+        try {
+            const [ordersRes, eldersRes] = await Promise.all([fetch(API + '/orders'), fetch(API + '/elders')]);
+            allOrders = (await ordersRes.json()).data || [];
+            allElders = (await eldersRes.json()).data || [];
+            if (role === 'family') allOrders = allOrders.filter(o => o.familyId === user.username);
+            else if (role === 'worker') allOrders = allOrders.filter(o => o.status === 'pending' || o.workerId === user.username);
+            allOrders.sort((a,b) => new Date(b.createTime) - new Date(a.createTime));
+            updateStats();
+            renderOrders(allOrders);
+        } catch(e) { showToast('加载失败', 'error'); }
+    }
+    
+    function updateStats() {
+        document.getElementById('totalCount').innerText = allOrders.length;
+        document.getElementById('pendingCount').innerText = allOrders.filter(o => o.status === 'pending').length;
+        document.getElementById('acceptedCount').innerText = allOrders.filter(o => o.status === 'accepted').length;
+    }
+    
+    function applyFilter() {
+        const status = document.getElementById('statusFilter').value;
+        renderOrders(status ? allOrders.filter(o => o.status === status) : allOrders);
+    }
+
+    function renderOrders(orders) {
+        const elderMap = new Map(allElders.map(e => [e.id, e.name]));
+        if (!orders.length) { document.getElementById('orderBody').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;">暂无订单</td></tr>'; return; }
+        document.getElementById('orderBody').innerHTML = orders.map(o => {
+            const typeHtml = o.type === '紧急求助' ? '<span class="badge-emergency">紧急求助</span>' : '<span class="badge-normal">陪诊服务</span>';
+            let opHtml = '-';
+            if (role === 'worker' && o.status === 'pending') opHtml = `<button class="oper-btn" onclick="acceptOrder('${o.orderId}')">接单</button>`;
+            else if (role === 'admin' && o.status === 'pending') opHtml = `<button class="oper-btn assign-btn" onclick="showAssignModal({orderId:'${o.orderId}',elderId:'${o.elderId}',type:'${o.type}'})">指派护工</button>`;
+            else if (o.status === 'accepted') opHtml = '<span style="color:#52c41a;">已处理</span>';
+            return `<tr><td>${(o.orderId||'').replace(/[&<>]/g,'')}</td><td>${(o.elderId||'').replace(/[&<>]/g,'')}</td><td>${(elderMap.get(o.elderId)||'未知').replace(/[&<>]/g,'')}</td><td>${(o.familyId||'').replace(/[&<>]/g,'')}</td><td>${(o.workerId||'').replace(/[&<>]/g,'')}</td><td>${typeHtml}</td><td class="${o.status==='pending'?'status-pending':'status-accepted'}">${o.status==='pending'?'待接单':'已接单'}</td><td>${(o.createTime||'').replace('T',' ')}</td><td>${opHtml}</td></tr>`;
+        }).join('');
+    }
+
+    async function acceptOrder(orderId) {
+        if (!confirm('确定接单吗？')) return;
+        try { const res = await fetch(API + '/orders/accept', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderId, workerId: user.username }) }); if ((await res.json()).code === 200) { showToast('接单成功', 'success'); loadOrders(); } else showToast('接单失败', 'error'); } catch(e) { showToast('接单失败', 'error'); }
+    }
+    window.onclick = function(e) { if (e.target === document.getElementById('assignModal')) closeAssignModal(); }
+    
+    displayUserInfo();
+    loadWorkers();
+    loadOrders();
+</script>
+</body>
+</html>

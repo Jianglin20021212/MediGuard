@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>健康知识库 | 老人健康监护系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; }
+        body { 
+            background: #f5f7fa;
+            background-image: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1920&q=80');
+            background-size: cover; background-position: center; background-attachment: fixed;
+            position: relative;
+        }
+        body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(245,247,250,0.88); z-index: -1; }
+        .navbar { background: #2c5282; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .logo { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .logo i { font-size: 28px; }
+        .logo span { font-size: 22px; font-weight: bold; }
+        .nav-menu { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+        .dropdown { position: relative; display: inline-block; }
+        .dropbtn { background: none; border: none; color: white; font-size: 16px; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: all 0.3s; }
+        .dropbtn:hover { background: #1e3a8a; }
+        .dropdown-content { display: none; position: absolute; background: white; min-width: 160px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); border-radius: 8px; z-index: 10; }
+        .dropdown-content a { color: #2c5282 !important; padding: 10px 15px; display: block; text-decoration: none; font-size: 14px; transition: all 0.2s; }
+        .dropdown-content a:hover { background: #f0f2f5; padding-left: 20px; }
+        .dropdown:hover .dropdown-content { display: block; }
+        .nav-menu a { color: white; text-decoration: none; padding: 8px 12px; border-radius: 6px; transition: all 0.3s; }
+        .nav-menu a:hover, .nav-menu a.active { background: #1e3a8a; }
+        .nav-menu button { background: none; border: none; color: white; font-size: 16px; cursor: pointer; padding: 8px 12px; border-radius: 6px; transition: all 0.3s; }
+        .nav-menu button:hover { background: #1e3a8a; }
+        
+        .user-info { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.15); padding: 6px 16px; border-radius: 40px; }
+        .user-avatar { width: 32px; height: 32px; background: #ffd700; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #2c5282; font-weight: bold; font-size: 16px; }
+        .user-details { display: flex; flex-direction: column; line-height: 1.3; }
+        .user-name { font-weight: bold; font-size: 14px; }
+        .user-role { font-size: 11px; opacity: 0.85; }
+        
+        .container { max-width: 1300px; margin: 30px auto; padding: 0 20px 40px; }
+        h2 { color: #2c5282; font-size: 28px; margin-bottom: 25px; text-align: center; }
+        
+        /* 搜索栏 */
+        .search-bar {
+            background: white; border-radius: 16px; padding: 20px; margin-bottom: 25px;
+            display: flex; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .search-bar input {
+            flex: 1; padding: 12px 18px; border: 2px solid #e2e8f0; border-radius: 10px;
+            font-size: 15px; transition: all 0.3s;
+        }
+        .search-bar input:focus { outline: none; border-color: #2c5282; }
+        .search-bar button {
+            padding: 12px 24px; background: #2c5282; color: white;
+            border: none; border-radius: 10px; cursor: pointer; font-size: 15px;
+        }
+        
+        /* 分类标签 */
+        .category-tabs {
+            display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap;
+        }
+        .category-tab {
+            padding: 8px 18px; border-radius: 20px; cursor: pointer;
+            border: 2px solid #e2e8f0; background: white; color: #666;
+            font-size: 13px; transition: all 0.3s;
+        }
+        .category-tab:hover, .category-tab.active {
+            background: #2c5282; color: white; border-color: #2c5282;
+        }
+        
+        /* 知识卡片 */
+        .knowledge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .knowledge-card {
+            background: white; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s;
+            cursor: pointer;
+        }
+        .knowledge-card:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+        .card-image {
+            height: 200px; display: flex; align-items: center; justify-content: center;
+            font-size: 70px; position: relative; overflow: hidden;
+        }
+        .card-image.hypertension { background: linear-gradient(135deg, #fff5f5, #fed7d7); }
+        .card-image.diabetes { background: linear-gradient(135deg, #fffaf0, #feebc8); }
+        .card-image.fall { background: linear-gradient(135deg, #f0fff4, #c6f6d5); }
+        .card-image.medicine { background: linear-gradient(135deg, #ebf8ff, #bee3f8); }
+        .card-image.diet { background: linear-gradient(135deg, #faf5ff, #e9d8fd); }
+        .card-image.exercise { background: linear-gradient(135deg, #fff5f5, #fbb6ce); }
+        .card-image.mental { background: linear-gradient(135deg, #fffbeb, #fef3c7); }
+        .card-image.checkup { background: linear-gradient(135deg, #f0fdf4, #bbf7d0); }
+        .card-image.bone { background: linear-gradient(135deg, #eff6ff, #bfdbfe); }
+        .card-image.sleep { background: linear-gradient(135deg, #f5f3ff, #ddd6fe); }
+        
+        .card-body { padding: 22px; }
+        .card-body h3 { color: #2c5282; font-size: 18px; margin-bottom: 10px; }
+        .card-body p { color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 12px; }
+        .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .card-tag {
+            padding: 4px 10px; border-radius: 15px; font-size: 11px;
+            background: #e8f0fe; color: #2c5282;
+        }
+        .card-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 22px; border-top: 1px solid #f0f0f0;
+            color: #999; font-size: 13px;
+        }
+        
+        /* 弹窗 */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; border-radius: 20px; width: 90%; max-width: 750px;
+            max-height: 85vh; overflow-y: auto; animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .modal-header {
+            padding: 25px 30px; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-header h2 { margin: 0; font-size: 22px; text-align: left; }
+        .close-btn { font-size: 30px; cursor: pointer; color: #999; transition: all 0.2s; }
+        .close-btn:hover { color: #e53e3e; }
+        .modal-body { padding: 30px; }
+        .modal-body .detail-icon { font-size: 60px; text-align: center; margin-bottom: 20px; }
+        .modal-body h3 { color: #2c5282; margin: 20px 0 10px; font-size: 18px; }
+        .modal-body p { color: #444; line-height: 1.9; margin-bottom: 12px; font-size: 15px; }
+        .modal-body ul { margin: 10px 0 10px 20px; line-height: 2; }
+        .modal-body .tip-box {
+            background: #fffbeb; border-left: 4px solid #ed8936;
+            padding: 15px 20px; border-radius: 8px; margin: 15px 0;
+        }
+        .modal-body .danger-box {
+            background: #fff5f5; border-left: 4px solid #e53e3e;
+            padding: 15px 20px; border-radius: 8px; margin: 15px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 15px; }
+            .knowledge-grid { grid-template-columns: 1fr; }
+            .user-info { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="logo" onclick="location.href='index.html'">
+        <i>❤️</i>
+        <span>老人健康监护系统</span>
+    </div>
+    <div class="nav-menu" id="navMenu"></div>
+    <div class="user-info" id="userInfo">
+        <div class="user-avatar" id="userAvatar">👤</div>
+        <div class="user-details">
+            <span class="user-name" id="userName">加载中...</span>
+            <span class="user-role" id="userRole">--</span>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h2>📚 健康知识库</h2>
+    
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 搜索健康知识..." oninput="filterKnowledge()">
+        <button onclick="filterKnowledge()">搜索</button>
+    </div>
+    
+    <div class="category-tabs" id="categoryTabs">
+        <div class="category-tab active" onclick="filterByCategory('all')">全部</div>
+        <div class="category-tab" onclick="filterByCategory('高血压')">高血压</div>
+        <div class="category-tab" onclick="filterByCategory('糖尿病')">糖尿病</div>
+        <div class="category-tab" onclick="filterByCategory('安全')">安全防护</div>
+        <div class="category-tab" onclick="filterByCategory('用药')">合理用药</div>
+        <div class="category-tab" onclick="filterByCategory('饮食')">健康饮食</div>
+        <div class="category-tab" onclick="filterByCategory('运动')">适度运动</div>
+        <div class="category-tab" onclick="filterByCategory('心理')">心理健康</div>
+        <div class="category-tab" onclick="filterByCategory('睡眠')">睡眠管理</div>
+    </div>
+    
+    <div class="knowledge-grid" id="knowledgeGrid"></div>
+</div>
+
+<div id="detailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">知识详情</h2>
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+    const API ='https://b87adf433127d168-106-85-77-62.serveousercontent.com/api';
+    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    if (!user.username) window.location.href = 'login.html';
+    const role = user.role || 'admin';
+
+    const roleNames = { 'admin': '👑 系统管理员', 'worker': '👨‍⚕️ 护工', 'family': '👨‍👩‍👧 家属' };
+    const roleIcons = { 'admin': '👑', 'worker': '🩺', 'family': '💝' };
+
+    function displayUserInfo() {
+        document.getElementById('userName').innerText = user.username || '未知用户';
+        document.getElementById('userRole').innerHTML = roleNames[role] || role;
+        document.getElementById('userAvatar').innerHTML = roleIcons[role] || '👤';
+    }
+    function logout() { localStorage.removeItem('currentUser'); location.href = 'login.html'; }
+
+    const navMenu = document.getElementById('navMenu');
+    const commonDropdowns = `
+        <div class="dropdown"><button class="dropbtn">数据看板 ▼</button><div class="dropdown-content"><a href="dashboard.html">数据大屏</a><a href="ai_dashboard.html">AI预测</a><a href="warning.html">健康预警</a><a href="result.html">风险评估</a></div></div>
+        <div class="dropdown"><button class="dropbtn">亲情留言 ▼</button><div class="dropdown-content"><a href="messages.html">查看留言</a><a href="messages.html">发送留言</a></div></div>
+         <div class="dropdown"><button class="dropbtn">健康知识库 ▼</button><div class="dropdown-content"><a href="knowledge.html">健康知识库</a></div></div>
+        <div class="dropdown"><button class="dropbtn">系统设置 ▼</button><div class="dropdown-content"><a href="setting.html">账号设置</a></div></div>
+        <button onclick="logout()">退出登录</button>
+    `;
+    if (role === 'admin') {
+        navMenu.innerHTML = `<a href="index.html">🏠 首页</a>
+         <div class="dropdown"><button class="dropbtn">老人管理 ▼</button><div class="dropdown-content"><a href="list.html">老人列表</a><a href="add.html">健康录入</a></div></div>
+            <div class="dropdown"><button class="dropbtn">服务管理 ▼</button><div class="dropdown-content"><a href="service.html">服务记录</a><a href="orders.html">订单管理</a></div></div>
+            ${commonDropdowns}`;
+    } else if (role === 'worker') {
+        navMenu.innerHTML = `<a href="index.html">🏠 首页</a>
+         <div class="dropdown"><button class="dropbtn">老人管理 ▼</button><div class="dropdown-content"><a href="list.html">老人信息</a><a href="add.html">健康录入</a></div></div>
+            <div class="dropdown"><button class="dropbtn">订单管理 ▼</button><div class="dropdown-content"><a href="orders.html">待接单</a><a href="service.html">服务记录</a></div></div>
+            ${commonDropdowns}`;
+    } else {
+
+        navMenu.innerHTML = `<a href="index.html">🏠 首页</a>
+        <div class="dropdown"><button class="dropbtn">老人服务 ▼</button><div class="dropdown-content"><a href="family_bind.html">绑定老人</a><a href="accompany.html">一键陪诊</a><a href="orders.html">我的订单</a><a href="messages.html">亲情留言</a></div></div>
+            ${commonDropdowns}`;
+    }
+
+    // 知识库数据
+    const knowledgeList = [
+        {
+            id: 1, title: '老年人高血压防治指南', icon: '🫀', summary: '高血压是老年人最常见的慢性病，科学防治可有效降低心脑血管风险。',
+            category: '高血压', imageClass: 'hypertension',
+            tags: ['血压管理', '用药指导', '饮食控制'],
+            readTime: '8分钟', level: '基础',
+            detail: {
+                sections: [
+                    { title: '什么是高血压？', content: '高血压是指动脉血压持续升高，收缩压≥140mmHg和/或舒张压≥90mmHg。老年人高血压具有收缩压升高明显、脉压差大、血压波动大等特点。' },
+                    { title: '高血压的危害', content: '长期高血压会损害心、脑、肾等重要器官，增加心肌梗死、脑卒中、肾功能衰竭等风险。是老年人致残、致死的主要原因之一。' },
+                    { title: '血压监测建议', content: '建议每天早晚各测量一次血压。早晨在服药前、排尿后测量；晚上在睡前测量。每次测量2-3遍，取平均值。记录血压日记，便于医生调整用药。' },
+                    { title: '生活方式干预', content: '限盐（每日<6g）、控制体重、戒烟限酒、规律运动、保持心情舒畅。DASH饮食模式被证明对降压有益。' }
+                ],
+                tips: ['选用低钠盐替代普通食盐', '多吃富含钾的食物如香蕉、土豆', '每周至少150分钟中等强度运动'],
+                warning: '⚠️ 血压突然升高至180/120mmHg以上，伴头痛、视物模糊等症状，请立即就医！'
+            }
+        },
+        {
+            id: 2, title: '糖尿病饮食控制全攻略', icon: '🍎', summary: '科学饮食是控制血糖的关键，合理搭配让血糖更平稳。',
+            category: '糖尿病', imageClass: 'diabetes',
+            tags: ['血糖管理', '饮食搭配', '运动建议'],
+            readTime: '10分钟', level: '重要',
+            detail: {
+                sections: [
+                    { title: '糖尿病饮食原则', content: '控制总热量摄入，均衡营养。碳水化合物占50-60%，蛋白质占15-20%，脂肪占25-30%。优选低GI食物，定时定量进餐。' },
+                    { title: '推荐食物清单', content: '主食：燕麦、荞麦、糙米等全谷物。蔬菜：绿叶蔬菜、黄瓜、西红柿等。蛋白质：鱼、去皮鸡肉、豆制品。水果：苹果、梨、柚子等低糖水果。' },
+                    { title: '需要限制的食物', content: '含糖饮料、甜点、油炸食品、肥肉、加工肉制品。精制碳水如白米饭、白面包也应适量控制。' },
+                    { title: '血糖监测要点', content: '空腹血糖控制在4.4-7.0mmol/L，餐后2小时血糖<10.0mmol/L。糖化血红蛋白<7.0%。' }
+                ],
+                tips: ['进餐顺序：先喝汤→蔬菜→蛋白质→主食', '水果在两餐之间食用，每次不超过200g', '每周至少监测2-3次血糖谱'],
+                warning: '⚠️ 出现心慌、出冷汗、乏力等低血糖症状，立即进食糖果或含糖饮料！'
+            }
+        },
+        {
+            id: 3, title: '预防跌倒安全手册', icon: '🦯', summary: '跌倒是65岁以上老人意外伤害的首要原因，预防胜于治疗。',
+            category: '安全', imageClass: 'fall',
+            tags: ['居家安全', '平衡训练', '环境改造'],
+            readTime: '6分钟', level: '必读',
+            detail: {
+                sections: [
+                    { title: '跌倒的危害', content: '每年约1/3的65岁以上老人发生跌倒。跌倒可导致骨折、颅脑损伤等严重后果，是老年人失能和死亡的重要原因。' },
+                    { title: '居家安全改造', content: '浴室铺设防滑垫，安装扶手。走廊和房间保持明亮，清除地面杂物。床的高度以坐姿时双脚能平放地面为宜。' },
+                    { title: '平衡训练方法', content: '太极拳被证实可有效降低跌倒风险。单腿站立练习（扶椅背）、脚跟对脚尖行走等都是简单有效的训练。' }
+                ],
+                tips: ['鞋子要防滑合脚，避免穿拖鞋', '夜间起床先开灯，坐床边片刻再站立', '定期检查视力和听力'],
+                warning: '⚠️ 跌倒后出现剧烈疼痛、无法站立或活动受限，请立即拨打120！'
+            }
+        },
+        {
+            id: 4, title: '老年人合理用药指导', icon: '💊', summary: '安全用药须遵医嘱，避免多重用药风险。',
+            category: '用药', imageClass: 'medicine',
+            tags: ['用药安全', '药物管理', '不良反应'],
+            readTime: '7分钟', level: '重要',
+            detail: {
+                sections: [
+                    { title: '多重用药风险', content: '老年人常同时服用多种药物，药物相互作用风险增加。建议定期由医生或药师进行用药审查。' },
+                    { title: '用药原则', content: '遵医嘱用药，不自行增减剂量或停药。使用药盒或用药提醒工具，避免漏服或重复服用。了解每种药物的作用和可能的副作用。' }
+                ],
+                tips: ['制作用药清单，就诊时带给医生看', '不要随意服用保健品替代药物', '服药后出现不适及时就医'],
+                warning: '⚠️ 出现皮疹、呼吸困难、严重头晕等过敏反应，立即停药就医！'
+            }
+        },
+        {
+            id: 5, title: '银龄健康饮食金字塔', icon: '🥗', summary: '均衡营养是健康长寿的基础，科学搭配让每一餐都营养满分。',
+            category: '饮食', imageClass: 'diet',
+            tags: ['营养均衡', '膳食指南', '食谱推荐'],
+            readTime: '8分钟', level: '基础',
+            detail: {
+                sections: [
+                    { title: '每日营养需求', content: '老年人每日需摄入足够的蛋白质（1.0-1.2g/kg体重）、钙（1000mg）、维生素D（800IU）。多吃深色蔬菜和水果保证维生素摄入。' },
+                    { title: '三餐搭配建议', content: '早餐：优质蛋白+全谷物+蔬果。午餐：主食+荤素搭配+汤。晚餐：清淡易消化，七分饱即可。' }
+                ],
+                tips: ['食物多样化，每天至少12种食材', '烹饪以蒸、煮、炖为主，少煎炸', '适量饮水，每天1500-2000ml'],
+                warning: '⚠️ 进食困难或体重明显下降，请咨询营养科医生！'
+            }
+        },
+        {
+            id: 6, title: '老年人适度运动指南', icon: '🚶', summary: '生命在于运动，老年人科学锻炼可增强体质延缓衰老。',
+            category: '运动', imageClass: 'exercise',
+            tags: ['有氧运动', '力量训练', '柔韧练习'],
+            readTime: '6分钟', level: '推荐',
+            detail: {
+                sections: [
+                    { title: '运动类型推荐', content: '有氧运动：快走、游泳、骑车，每周3-5次，每次30分钟。力量训练：弹力带、小重量哑铃，每周2次。柔韧训练：拉伸、太极拳，每天进行。' },
+                    { title: '运动注意事项', content: '运动前热身5-10分钟。避免空腹运动。选择平坦安全的运动场所。运动后做整理活动。' }
+                ],
+                tips: ['从低强度开始，循序渐进', '运动时能正常说话为适宜强度', '天气不好时可在室内活动'],
+                warning: '⚠️ 运动中出现胸闷、头晕、呼吸困难，立即停止休息并就医！'
+            }
+        },
+        {
+            id: 7, title: '老年心理健康维护', icon: '🧠', summary: '心态年轻则身体年轻，关注心理健康同样重要。',
+            category: '心理', imageClass: 'mental',
+            tags: ['情绪管理', '社交活动', '认知训练'],
+            readTime: '5分钟', level: '推荐',
+            detail: {
+                sections: [
+                    { title: '常见的心理问题', content: '老年人常见的心理问题包括孤独感、焦虑、抑郁等。退休后角色转变、丧偶、疾病等因素都可能影响心理健康。' },
+                    { title: '保持心理健康的方法', content: '保持社交活动，参加老年大学或兴趣小组。培养爱好如园艺、书法、下棋。与家人保持良好沟通。必要时寻求心理咨询。' }
+                ],
+                tips: ['每天给自己一个微笑的理由', '多与老友联系，每周至少一次社交', '学习新事物如使用智能手机'],
+                warning: '⚠️ 持续情绪低落超过2周，请寻求专业心理帮助！'
+            }
+        },
+        {
+            id: 8, title: '定期体检项目详解', icon: '🩺', summary: '早发现早治疗，了解各项体检指标的意义。',
+            category: '检查', imageClass: 'checkup',
+            tags: ['体检项目', '指标解读', '健康管理'],
+            readTime: '7分钟', level: '必读',
+            detail: {
+                sections: [
+                    { title: '基础体检项目', content: '血压、血糖、血脂、肝肾功能、心电图、胸片等是基础项目。老年人还应增加骨密度、肿瘤标志物、眼底检查等项目。' },
+                    { title: '体检频率建议', content: '一般建议每年1次全面体检。有慢性病者根据医生建议增加检查频率。血压、血糖可日常自我监测。' }
+                ],
+                tips: ['体检前保持正常饮食和作息', '带好既往体检报告供医生对比', '体检后认真阅读报告并遵医嘱复查'],
+                warning: '⚠️ 体检发现异常指标请及时就医，不要自行判断！'
+            }
+        },
+        {
+            id: 9, title: '改善睡眠质量方法', icon: '😴', summary: '优质睡眠是健康的基石，掌握科学方法告别失眠困扰。',
+            category: '睡眠', imageClass: 'sleep',
+            tags: ['睡眠卫生', '失眠应对', '作息规律'],
+            readTime: '5分钟', level: '推荐',
+            detail: {
+                sections: [
+                    { title: '老年人睡眠特点', content: '老年人睡眠结构改变，深睡眠减少，夜间易醒。每天6-7小时睡眠即可，不必追求8小时。午睡控制在30分钟内。' },
+                    { title: '改善睡眠的方法', content: '固定作息时间，每天同一时间上床和起床。睡前1小时避免使用电子产品。卧室保持安静、黑暗、凉爽。睡前可泡脚、听轻音乐放松。' }
+                ],
+                tips: ['下午4点后不喝浓茶和咖啡', '晚餐不过饱，睡前不大量饮水', '白天适当运动有助夜间睡眠'],
+                warning: '⚠️ 长期失眠请就医，不要自行服用安眠药！'
+            }
+        }
+    ];
+    
+    let currentCategory = 'all';
+
+    function renderKnowledge(filteredList) {
+        const grid = document.getElementById('knowledgeGrid');
+        grid.innerHTML = filteredList.map(k => `
+            <div class="knowledge-card" onclick="showDetail(${k.id})">
+                <div class="card-image ${k.imageClass}">${k.icon}</div>
+                <div class="card-body">
+                    <h3>${k.title}</h3>
+                    <p>${k.summary}</p>
+                    <div class="card-tags">
+                        ${k.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <span>📖 ${k.readTime}</span>
+                    <span>📊 ${k.level}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterByCategory(cat) {
+        currentCategory = cat;
+        document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        const filtered = cat === 'all' ? knowledgeList : knowledgeList.filter(k => k.category === cat);
+        renderKnowledge(filtered);
+    }
+
+    function filterKnowledge() {
+        const kw = document.getElementById('searchInput').value.trim().toLowerCase();
+        let list = currentCategory === 'all' ? knowledgeList : knowledgeList.filter(k => k.category === currentCategory);
+        if (kw) list = list.filter(k => k.title.includes(kw) || k.summary.includes(kw) || k.tags.some(t => t.includes(kw)));
+        renderKnowledge(list);
+    }
+
+    function showDetail(id) {
+        const item = knowledgeList.find(k => k.id === id);
+        if (!item) return;
+        document.getElementById('modalTitle').innerHTML = `${item.icon} ${item.title}`;
+        let html = `<div class="detail-icon">${item.icon}</div>`;
+        item.detail.sections.forEach(s => {
+            html += `<h3>📌 ${s.title}</h3><p>${s.content}</p>`;
+        });
+        if (item.detail.tips) {
+            html += '<div class="tip-box"><strong>💡 实用小贴士：</strong><ul>';
+            item.detail.tips.forEach(t => { html += `<li>${t}</li>`; });
+            html += '</ul></div>';
+        }
+        html += `<div class="danger-box"><strong>${item.detail.warning}</strong></div>`;
+        document.getElementById('modalBody').innerHTML = html;
+        document.getElementById('detailModal').style.display = 'flex';
+    }
+
+    function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
+    document.getElementById('detailModal').onclick = function(e) { if (e.target === this) closeModal(); };
+
+    displayUserInfo();
+    renderKnowledge(knowledgeList);
+</script>
+</body>
+</html>
